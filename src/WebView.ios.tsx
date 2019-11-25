@@ -214,7 +214,7 @@ class WebView extends React.Component<IOSWebViewProps, State> {
     if (onHttpError) {
       onHttpError(event);
     }
-  }
+  };
 
   onLoadingFinish = (event: WebViewNavigationEvent) => {
     const { onLoad, onLoadEnd } = this.props;
@@ -249,9 +249,9 @@ class WebView extends React.Component<IOSWebViewProps, State> {
     _url: string,
     lockIdentifier: number,
   ) => {
-    const viewManager
-      = (this.props.nativeConfig && this.props.nativeConfig.viewManager)
-      || RNCWebViewManager;
+    const viewManager =
+      (this.props.nativeConfig && this.props.nativeConfig.viewManager) ||
+      RNCWebViewManager;
 
     viewManager.startLoadWithResult(!!shouldStart, lockIdentifier);
   };
@@ -325,9 +325,9 @@ class WebView extends React.Component<IOSWebViewProps, State> {
 
     const decelerationRate = processDecelerationRate(decelerationRateProp);
 
-    const NativeWebView
-      = (nativeConfig.component as typeof NativeWebViewIOS | undefined)
-      || RNCWebView;
+    const NativeWebView =
+      (nativeConfig.component as typeof NativeWebViewIOS | undefined) ||
+      RNCWebView;
 
     const webView = (
       <NativeWebView
@@ -342,6 +342,7 @@ class WebView extends React.Component<IOSWebViewProps, State> {
         onHttpError={this.onHttpError}
         onMessage={this.onMessage}
         onScroll={this.props.onScroll}
+        onGesture={this.props.onGesture}
         onShouldStartLoadWithRequest={onShouldStartLoadWithRequest}
         onContentProcessDidTerminate={this.onContentProcessDidTerminate}
         ref={this.webViewRef}

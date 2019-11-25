@@ -333,6 +333,7 @@ class WebView extends React.Component<AndroidWebViewProps, State> {
         onLoadingStart={this.onLoadingStart}
         onHttpError={this.onHttpError}
         onMessage={this.onMessage}
+        onGesture={this.props.onGesture}
         onShouldStartLoadWithRequest={onShouldStartLoadWithRequest}
         ref={this.webViewRef}
         // TODO: find a better way to type this.
