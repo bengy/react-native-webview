@@ -103,7 +103,7 @@ export interface WebViewMessage extends WebViewNativeEvent {
 }
 
 export interface WebViewGesture extends WebViewNativeEvent {
-  data: string;
+  gesture: 'DoubleTap' | 'SingleTap' | 'LongPress' | 'SwipeLeft' | 'SwipeRight' | 'SwipeUp' | 'SwipeDown' ;
 }
 
 export interface WebViewError extends WebViewNativeEvent {
