@@ -16,7 +16,9 @@ import android.os.Environment;
 import androidx.annotation.RequiresApi;
 import androidx.core.content.ContextCompat;
 import android.text.TextUtils;
+import android.view.GestureDetector;
 import android.view.Gravity;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
@@ -115,6 +117,9 @@ public class RNCWebViewManager extends SimpleViewManager<WebView> {
   public static final int COMMAND_INJECT_JAVASCRIPT = 6;
   public static final int COMMAND_LOAD_URL = 7;
   public static final int COMMAND_FOCUS = 8;
+  private static final int SWIPE_MIN_DISTANCE = 100;
+  private static final int SWIPE_MAX_DISTANCE = 650;
+  private static final int SWIPE_MIN_VELOCITY = 100;
 
   // android commands
   public static final int COMMAND_CLEAR_FORM_DATA = 1000;
@@ -235,7 +240,7 @@ public class RNCWebViewManager extends SimpleViewManager<WebView> {
     return webView;
   }
 
-  private void sendGesture(final ThemedReactContext reactContext, int viewId, String gesture) {
+  private void sendGesture(final ThemedReactContext reactContext, WebView webView, String gesture) {
     WritableMap event = Arguments.createMap();
     event.putString("gesture", gesture);
 
@@ -278,7 +283,7 @@ public class RNCWebViewManager extends SimpleViewManager<WebView> {
 
             @Override
             public boolean onDoubleTap(MotionEvent e) {
-                sendGesture(reactContext, webView.getId(), "DoubleTap");
+                sendGesture(reactContext, webView, "DoubleTap");
                 return false;
             }
 
@@ -289,7 +294,7 @@ public class RNCWebViewManager extends SimpleViewManager<WebView> {
 
             @Override
             public boolean onSingleTapConfirmed(MotionEvent e) {
-                sendGesture(reactContext, webView.getId(), "SingleTap");
+                sendGesture(reactContext, webView, "SingleTap");
                 return false;
             }
 
@@ -300,7 +305,7 @@ public class RNCWebViewManager extends SimpleViewManager<WebView> {
 
             @Override
             public void onLongPress(MotionEvent motionEvent) {
-                sendGesture(reactContext, webView.getId(), "LongPress");
+                sendGesture(reactContext, webView, "LongPress");
             }
 
             @Override
@@ -317,15 +322,15 @@ public class RNCWebViewManager extends SimpleViewManager<WebView> {
                 float v1_abs = Math.abs(v1);
                 if (v_abs > SWIPE_MIN_VELOCITY && xDistance > SWIPE_MIN_DISTANCE) {
                     if (motionEvent.getX() > motionEvent1.getX()) {
-                        sendGesture(reactContext, webView.getId(), "SwipeLeft");
+                        sendGesture(reactContext, webView, "SwipeLeft");
                     } else {
-                        sendGesture(reactContext, webView.getId(), "SwipeRight");
+                        sendGesture(reactContext, webView, "SwipeRight");
                     }
                 } else if (v1_abs > SWIPE_MIN_VELOCITY && yDistance > SWIPE_MIN_DISTANCE) {
                     if (motionEvent.getY() > motionEvent1.getY()) {
-                        sendGesture(reactContext, webView.getId(), "SwipeUp");
+                        sendGesture(reactContext, webView, "SwipeUp");
                     } else {
-                        sendGesture(reactContext, webView.getId(), "SwipeDown");
+                        sendGesture(reactContext, webView, "SwipeDown");
                     }
                 }
                 return false;
