@@ -61,6 +61,7 @@ import com.facebook.react.uimanager.events.Event;
 import com.facebook.react.uimanager.events.EventDispatcher;
 import com.reactnativecommunity.webview.events.TopLoadingErrorEvent;
 import com.reactnativecommunity.webview.events.TopHttpErrorEvent;
+import com.reactnativecommunity.webview.events.TopGestureEvent;
 import com.reactnativecommunity.webview.events.TopLoadingFinishEvent;
 import com.reactnativecommunity.webview.events.TopLoadingProgressEvent;
 import com.reactnativecommunity.webview.events.TopLoadingStartEvent;
@@ -246,7 +247,7 @@ public class RNCWebViewManager extends SimpleViewManager<WebView> {
 
     dispatchEvent(
       webView,
-      new TopMessageEvent(
+      new TopGestureEvent(
         webView.getId(),
         event));
   }
@@ -651,7 +652,7 @@ public class RNCWebViewManager extends SimpleViewManager<WebView> {
     export.put(TopShouldStartLoadWithRequestEvent.EVENT_NAME, MapBuilder.of("registrationName", "onShouldStartLoadWithRequest"));
     export.put(ScrollEventType.getJSEventName(ScrollEventType.SCROLL), MapBuilder.of("registrationName", "onScroll"));
     export.put(TopHttpErrorEvent.EVENT_NAME, MapBuilder.of("registrationName", "onHttpError"));
-    export.put(TopMessageEvent.EVENT_NAME, MapBuilder.of("registrationName", "onGesture"));
+    export.put(TopGestureEvent.EVENT_NAME, MapBuilder.of("registrationName", "onGesture"));
     return export;
   }
 
