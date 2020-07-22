@@ -46,9 +46,7 @@ static NSDictionary* customCertificatesForHost;
 @end
 #endif // !TARGET_OS_OSX
 
-<<<<<<< HEAD:ios/RNCWebView.m
 @interface RNCWebView () <WKUIDelegate, WKNavigationDelegate, WKScriptMessageHandler, UIScrollViewDelegate, RCTAutoInsetsProtocol, UIGestureRecognizerDelegate>
-=======
 #if TARGET_OS_OSX
 @interface RNCWKWebView : WKWebView
 @end
