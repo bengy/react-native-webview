@@ -57,3 +57,8 @@ lib/
 android/.project
 android/.classpath
 android/.settings
+.classpath
+.project
+.settings/
+msbuild.binlog
+example/msbuild.binlog
