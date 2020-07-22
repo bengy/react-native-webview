@@ -46,6 +46,9 @@ static NSDictionary* customCertificatesForHost;
 @end
 #endif // !TARGET_OS_OSX
 
+<<<<<<< HEAD:ios/RNCWebView.m
+@interface RNCWebView () <WKUIDelegate, WKNavigationDelegate, WKScriptMessageHandler, UIScrollViewDelegate, RCTAutoInsetsProtocol, UIGestureRecognizerDelegate>
+=======
 #if TARGET_OS_OSX
 @interface RNCWKWebView : WKWebView
 @end
@@ -77,9 +80,11 @@ static NSDictionary* customCertificatesForHost;
 @property (nonatomic, copy) RCTDirectEventBlock onHttpError;
 @property (nonatomic, copy) RCTDirectEventBlock onMessage;
 @property (nonatomic, copy) RCTDirectEventBlock onScroll;
+@property (nonatomic, copy) RCTDirectEventBlock onGesture;
 @property (nonatomic, copy) RCTDirectEventBlock onContentProcessDidTerminate;
 #if !TARGET_OS_OSX
 @property (nonatomic, copy) WKWebView *webView;
+@property (atomic) BOOL didSendLongPress;
 #else
 @property (nonatomic, copy) RNCWKWebView *webView;
 #endif // !TARGET_OS_OSX
@@ -226,6 +231,7 @@ static NSDictionary* customCertificatesForHost;
   }
   wkWebViewConfig.userContentController = [WKUserContentController new];
 
+
   // Shim the HTML5 history API:
   [wkWebViewConfig.userContentController addScriptMessageHandler:[[RNCWeakScriptMessageDelegate alloc] initWithDelegate:self]
                                                             name:HistoryShimName];
@@ -287,10 +293,105 @@ static NSDictionary* customCertificatesForHost;
     }
 #endif
 
+    _didSendLongPress = NO;
+    UITapGestureRecognizer *singleTap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleSingleTapGesture:)];
+    singleTap.delegate = self;
+    singleTap.cancelsTouchesInView = false;
+    [_webView addGestureRecognizer:singleTap];
+
+    UITapGestureRecognizer *doubleTap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleDoubleTapGesture:)];
+    doubleTap.delegate = self;
+    doubleTap.cancelsTouchesInView = false;
+    doubleTap.numberOfTapsRequired = 2;
+    [_webView addGestureRecognizer:doubleTap];
+
+    UILongPressGestureRecognizer *longPress = [[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(handleLongPressGesture:)];
+    longPress.delegate = self;
+    longPress.cancelsTouchesInView = false;
+    [_webView addGestureRecognizer:longPress];
+
+    UISwipeGestureRecognizer *swipe = [[UISwipeGestureRecognizer alloc] initWithTarget:self action:@selector(handleSwipeGesture:)];
+    swipe.delegate = self;
+    swipe.cancelsTouchesInView = false;
+    swipe.direction = UISwipeGestureRecognizerDirectionRight;
+    [_webView addGestureRecognizer:swipe];
+
+    UISwipeGestureRecognizer *swipeDown = [[UISwipeGestureRecognizer alloc] initWithTarget:self action:@selector(handleSwipeDownGesture:)];
+    swipeDown.delegate = self;
+    swipeDown.cancelsTouchesInView = false;
+    swipeDown.direction = UISwipeGestureRecognizerDirectionDown;
+    [_webView addGestureRecognizer:swipeDown];
+
+    UISwipeGestureRecognizer *swipeLeft = [[UISwipeGestureRecognizer alloc] initWithTarget:self action:@selector(handleSwipeLeftGesture:)];
+    swipeLeft.delegate = self;
+    swipeLeft.cancelsTouchesInView = false;
+    swipeLeft.direction = UISwipeGestureRecognizerDirectionLeft;
+    [_webView addGestureRecognizer:swipeLeft];
+
+    UISwipeGestureRecognizer *swipeUp = [[UISwipeGestureRecognizer alloc] initWithTarget:self action:@selector(handleSwipeUpGesture:)];
+    swipeUp.delegate = self;
+    swipeUp.cancelsTouchesInView = false;
+    swipeUp.direction = UISwipeGestureRecognizerDirectionUp;
+    [_webView addGestureRecognizer:swipeUp];
+
     [self addSubview:_webView];
     [self setHideKeyboardAccessoryView: _savedHideKeyboardAccessoryView];
     [self setKeyboardDisplayRequiresUserAction: _savedKeyboardDisplayRequiresUserAction];
     [self visitSource];
+  }
+}
+
+
+-(BOOL)gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer *)otherGestureRecognizer{
+  return true;
+}
+
+-(void)handleSingleTapGesture:(UITapGestureRecognizer *)tapGestureRecognizer{
+  if (_didSendLongPress) {
+    _didSendLongPress = NO;
+    return;
+  }
+  if (_onGesture){
+    _onGesture(@{@"gesture": @"SingleTap"});
+  }
+}
+
+-(void)handleDoubleTapGesture:(UITapGestureRecognizer *)tapGestureRecognizer{
+  if (_onGesture){
+    _onGesture(@{@"gesture": @"DoubleTap"});
+  }
+}
+
+-(void)handleSwipeGesture:(UISwipeGestureRecognizer *)swipeGestureRecognizer{
+  if (_onGesture){
+    _onGesture(@{@"gesture": @"SwipeRight"});
+  }
+}
+
+-(void)handleSwipeDownGesture:(UISwipeGestureRecognizer *)swipeGestureRecognizer{
+  if (_onGesture){
+    _onGesture(@{@"gesture": @"SwipeDown"});
+  }
+}
+
+-(void)handleSwipeLeftGesture:(UISwipeGestureRecognizer *)swipeGestureRecognizer{
+  if (_onGesture){
+    _onGesture(@{@"gesture": @"SwipeLeft"});
+  }
+}
+
+-(void)handleSwipeUpGesture:(UISwipeGestureRecognizer *)swipeGestureRecognizer{
+  if (_onGesture){
+    _onGesture(@{@"gesture": @"SwipeUp"});
+  }
+}
+
+-(void)handleLongPressGesture:(UILongPressGestureRecognizer *)longPressGestureRecognizer{
+  if (longPressGestureRecognizer.state == UIGestureRecognizerStateBegan){
+    if (_onGesture){
+      _onGesture(@{@"gesture": @"LongPress"});
+      _didSendLongPress = YES;
+    }
   }
 }
 

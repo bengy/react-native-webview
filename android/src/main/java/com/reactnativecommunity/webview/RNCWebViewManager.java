@@ -17,7 +17,9 @@ import android.os.Environment;
 import androidx.annotation.RequiresApi;
 import androidx.core.content.ContextCompat;
 import android.text.TextUtils;
+import android.view.GestureDetector;
 import android.view.Gravity;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
@@ -64,6 +66,7 @@ import com.facebook.react.uimanager.events.Event;
 import com.facebook.react.uimanager.events.EventDispatcher;
 import com.reactnativecommunity.webview.events.TopLoadingErrorEvent;
 import com.reactnativecommunity.webview.events.TopHttpErrorEvent;
+import com.reactnativecommunity.webview.events.TopGestureEvent;
 import com.reactnativecommunity.webview.events.TopLoadingFinishEvent;
 import com.reactnativecommunity.webview.events.TopLoadingProgressEvent;
 import com.reactnativecommunity.webview.events.TopLoadingStartEvent;
@@ -119,6 +122,9 @@ public class RNCWebViewManager extends SimpleViewManager<WebView> {
   public static final int COMMAND_INJECT_JAVASCRIPT = 6;
   public static final int COMMAND_LOAD_URL = 7;
   public static final int COMMAND_FOCUS = 8;
+  private static final int SWIPE_MIN_DISTANCE = 100;
+  private static final int SWIPE_MAX_DISTANCE = 650;
+  private static final int SWIPE_MIN_VELOCITY = 100;
 
   // android commands
   public static final int COMMAND_CLEAR_FORM_DATA = 1000;
@@ -235,8 +241,109 @@ public class RNCWebViewManager extends SimpleViewManager<WebView> {
       }
     });
 
+    webView.setOnTouchListener(new GestureOnTouchListener(reactContext, webView));
+
     return webView;
   }
+
+  private void sendGesture(final ThemedReactContext reactContext, WebView webView, String gesture) {
+    WritableMap event = Arguments.createMap();
+    event.putString("gesture", gesture);
+
+    dispatchEvent(
+      webView,
+      new TopGestureEvent(
+        webView.getId(),
+        event));
+  }
+
+  // this was probably lifted from
+  // https://stackoverflow.com/questions/22904826/videoview-with-gestureswipe-function-in-android
+  private class GestureOnTouchListener implements View.OnTouchListener {
+    private final ThemedReactContext reactContext;
+    private final WebView webView;
+    GestureDetector gestureDetector;
+
+    @Override
+    public boolean onTouch(View view, MotionEvent motionEvent) {
+        return gestureDetector.onTouchEvent(motionEvent);
+        //return super.onTouch(view, motionEvent);
+    }
+
+
+
+    public GestureOnTouchListener(final ThemedReactContext reactContext, final WebView webView) {
+        this.reactContext = reactContext;
+        this.webView = webView;
+        gestureDetector = new GestureDetector(reactContext, new GestureDetector.SimpleOnGestureListener() {
+
+            @Override
+            public boolean onDown(MotionEvent motionEvent) {
+                return false;
+            }
+
+            @Override
+            public boolean onSingleTapUp(MotionEvent motionEvent) {
+                return false;
+            }
+
+            @Override
+            public boolean onDoubleTap(MotionEvent e) {
+                sendGesture(reactContext, webView, "DoubleTap");
+                return false;
+            }
+
+            @Override
+            public boolean onDoubleTapEvent(MotionEvent e) {
+                return true;
+            }
+
+            @Override
+            public boolean onSingleTapConfirmed(MotionEvent e) {
+                sendGesture(reactContext, webView, "SingleTap");
+                return false;
+            }
+
+            @Override
+            public boolean onScroll(MotionEvent motionEvent, MotionEvent motionEvent1, float v, float v1) {
+                return false;
+            }
+
+            @Override
+            public void onLongPress(MotionEvent motionEvent) {
+                sendGesture(reactContext, webView, "LongPress");
+            }
+
+            @Override
+            public boolean onFling(MotionEvent motionEvent, MotionEvent motionEvent1, float v, float v1) {
+
+                // get fling distance
+                final float xDistance = Math.abs(motionEvent.getX() - motionEvent1.getX());
+                final float yDistance = Math.abs(motionEvent.getY() - motionEvent1.getY());
+                if (xDistance > SWIPE_MAX_DISTANCE || yDistance > SWIPE_MAX_DISTANCE) {
+                    return false;
+                }
+
+                float v_abs = Math.abs(v);
+                float v1_abs = Math.abs(v1);
+                if (v_abs > SWIPE_MIN_VELOCITY && xDistance > SWIPE_MIN_DISTANCE) {
+                    if (motionEvent.getX() > motionEvent1.getX()) {
+                        sendGesture(reactContext, webView, "SwipeLeft");
+                    } else {
+                        sendGesture(reactContext, webView, "SwipeRight");
+                    }
+                } else if (v1_abs > SWIPE_MIN_VELOCITY && yDistance > SWIPE_MIN_DISTANCE) {
+                    if (motionEvent.getY() > motionEvent1.getY()) {
+                        sendGesture(reactContext, webView, "SwipeUp");
+                    } else {
+                        sendGesture(reactContext, webView, "SwipeDown");
+                    }
+                }
+                return false;
+            }
+        });
+    }
+}
 
   @ReactProp(name = "javaScriptEnabled")
   public void setJavaScriptEnabled(WebView view, boolean enabled) {
@@ -575,6 +682,7 @@ public class RNCWebViewManager extends SimpleViewManager<WebView> {
     export.put(TopShouldStartLoadWithRequestEvent.EVENT_NAME, MapBuilder.of("registrationName", "onShouldStartLoadWithRequest"));
     export.put(ScrollEventType.getJSEventName(ScrollEventType.SCROLL), MapBuilder.of("registrationName", "onScroll"));
     export.put(TopHttpErrorEvent.EVENT_NAME, MapBuilder.of("registrationName", "onHttpError"));
+    export.put(TopGestureEvent.EVENT_NAME, MapBuilder.of("registrationName", "onGesture"));
     return export;
   }
 
@@ -757,10 +865,6 @@ public class RNCWebViewManager extends SimpleViewManager<WebView> {
       super.onPageFinished(webView, url);
 
       if (!mLastLoadFailed) {
-        RNCWebView reactWebView = (RNCWebView) webView;
-
-        reactWebView.callInjectedJavaScript();
-
         emitFinishEvent(webView, url);
       }
     }
@@ -769,6 +873,8 @@ public class RNCWebViewManager extends SimpleViewManager<WebView> {
     public void onPageStarted(WebView webView, String url, Bitmap favicon) {
       super.onPageStarted(webView, url, favicon);
       mLastLoadFailed = false;
+      RNCWebView reactWebView = (RNCWebView) webView;
+      reactWebView.callInjectedJavaScript();
 
       RNCWebView reactWebView = (RNCWebView) webView;
       reactWebView.callInjectedJavaScriptBeforeContentLoaded();       

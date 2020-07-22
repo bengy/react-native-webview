@@ -123,6 +123,10 @@ export interface WebViewMessage extends WebViewNativeEvent {
   data: string;
 }
 
+export interface WebViewGesture extends WebViewNativeEvent {
+  gesture: 'DoubleTap' | 'SingleTap' | 'LongPress' | 'SwipeLeft' | 'SwipeRight' | 'SwipeUp' | 'SwipeDown' ;
+}
+
 export interface WebViewError extends WebViewNativeEvent {
   /**
    * `domain` is only used on iOS and macOS
@@ -148,6 +152,8 @@ export type WebViewNavigationEvent = NativeSyntheticEvent<WebViewNavigation>;
 export type FileDownloadEvent = NativeSyntheticEvent<FileDownload>;
 
 export type WebViewMessageEvent = NativeSyntheticEvent<WebViewMessage>;
+
+export type WebViewGestureEvent = NativeSyntheticEvent<WebViewGesture>;
 
 export type WebViewErrorEvent = NativeSyntheticEvent<WebViewError>;
 
@@ -246,6 +252,7 @@ export interface CommonNativeWebViewProps extends ViewProps {
   mediaPlaybackRequiresUserAction?: boolean;
   messagingEnabled: boolean;
   onScroll?: (event: NativeScrollEvent) => void;
+  onGesture?: (event: WebViewGestureEvent) => void;
   onLoadingError: (event: WebViewErrorEvent) => void;
   onLoadingFinish: (event: WebViewNavigationEvent) => void;
   onLoadingProgress: (event: WebViewProgressEvent) => void;
@@ -853,6 +860,11 @@ export interface WebViewSharedProps extends ViewProps {
    * Function that is invoked when the `WebView` scrolls.
    */
   onScroll?: (event: NativeScrollEvent) => void;
+
+  /**
+   * Function that is invoked when the `WebView` gesture is detected.
+   */
+  onGesture?: (event: WebViewGestureEvent) => void;
 
   /**
    * Function that is invoked when the `WebView` has finished loading.
