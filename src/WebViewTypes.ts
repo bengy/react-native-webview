@@ -141,6 +141,10 @@ export interface WebViewHttpError extends WebViewNativeEvent {
   statusCode: number;
 }
 
+export interface WebViewRenderProcessGoneDetail {
+  didCrash: boolean;
+}
+
 export type WebViewEvent = NativeSyntheticEvent<WebViewNativeEvent>;
 
 export type WebViewProgressEvent = NativeSyntheticEvent<
@@ -160,6 +164,8 @@ export type WebViewErrorEvent = NativeSyntheticEvent<WebViewError>;
 export type WebViewTerminatedEvent = NativeSyntheticEvent<WebViewNativeEvent>;
 
 export type WebViewHttpErrorEvent = NativeSyntheticEvent<WebViewHttpError>;
+
+export type WebViewRenderProcessGoneEvent = NativeSyntheticEvent<WebViewRenderProcessGoneDetail>;
 
 export type DataDetectorTypes =
   | 'phoneNumber'
@@ -284,6 +290,7 @@ export interface AndroidNativeWebViewProps extends CommonNativeWebViewProps {
   javaScriptEnabled?: boolean;
   mixedContentMode?: 'never' | 'always' | 'compatibility';
   onContentSizeChange?: (event: WebViewEvent) => void;
+  onRenderProcessGone?: (event: WebViewRenderProcessGoneEvent) => void;
   overScrollMode?: OverScrollModeType;
   saveFormDataDisabled?: boolean;
   textZoom?: number;
@@ -691,6 +698,12 @@ export interface AndroidWebViewProps extends WebViewSharedProps {
   onContentSizeChange?: (event: WebViewEvent) => void;
 
   /**
+   * Function that is invoked when the `WebView` process crashes or is killed by the OS.
+   * Works only on Android (minimum API level 26).
+   */
+  onRenderProcessGone?: (event: WebViewRenderProcessGoneEvent) => void;
+
+  /**
    * https://developer.android.com/reference/android/webkit/WebSettings.html#setCacheMode(int)
    * Set the cacheMode. Possible values are:
    *
@@ -728,7 +741,7 @@ export interface AndroidWebViewProps extends WebViewSharedProps {
    */
   geolocationEnabled?: boolean;
 
-  
+
   /**
    * Boolean that sets whether JavaScript running in the context of a file
    * scheme URL should be allowed to access content from other file scheme URLs.
@@ -985,4 +998,9 @@ export interface WebViewSharedProps extends ViewProps {
    * Should caching be enabled. Default is true.
    */
   cacheEnabled?: boolean;
+
+  /**
+   * Append to the existing user-agent. Overridden if `userAgent` is set.
+   */
+  applicationNameForUserAgent?: string;
 }
