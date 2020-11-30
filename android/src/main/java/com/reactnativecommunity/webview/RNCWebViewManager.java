@@ -903,6 +903,9 @@ public class RNCWebViewManager extends SimpleViewManager<WebView> {
       super.onPageFinished(webView, url);
 
       if (!mLastLoadFailed) {
+        RNCWebView reactWebView = (RNCWebView) webView;
+        reactWebView.callInjectedJavaScript();
+
         emitFinishEvent(webView, url);
       }
     }
@@ -911,8 +914,6 @@ public class RNCWebViewManager extends SimpleViewManager<WebView> {
     public void onPageStarted(WebView webView, String url, Bitmap favicon) {
       super.onPageStarted(webView, url, favicon);
       mLastLoadFailed = false;
-      RNCWebView reactWebView = (RNCWebView) webView;
-      reactWebView.callInjectedJavaScript();
 
       RNCWebView reactWebView = (RNCWebView) webView;
       reactWebView.callInjectedJavaScriptBeforeContentLoaded();
