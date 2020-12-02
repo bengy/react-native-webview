@@ -46,7 +46,6 @@ static NSDictionary* customCertificatesForHost;
 @end
 #endif // !TARGET_OS_OSX
 
-@interface RNCWebView () <WKUIDelegate, WKNavigationDelegate, WKScriptMessageHandler, UIScrollViewDelegate, RCTAutoInsetsProtocol, UIGestureRecognizerDelegate>
 #if TARGET_OS_OSX
 @interface RNCWKWebView : WKWebView
 @end
@@ -63,7 +62,7 @@ static NSDictionary* customCertificatesForHost;
 @end
 #endif // TARGET_OS_OSX
 
-@interface RNCWebView () <WKUIDelegate, WKNavigationDelegate, WKScriptMessageHandler,
+@interface RNCWebView () <WKUIDelegate, WKNavigationDelegate, WKScriptMessageHandler, UIGestureRecognizerDelegate,
 #if !TARGET_OS_OSX
     UIScrollViewDelegate,
 #endif // !TARGET_OS_OSX
