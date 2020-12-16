@@ -278,7 +278,7 @@ export interface CommonNativeWebViewProps extends ViewProps {
   javaScriptCanOpenWindowsAutomatically?: boolean;
   mediaPlaybackRequiresUserAction?: boolean;
   messagingEnabled: boolean;
-  onScroll?: (event: NativeScrollEvent) => void;
+  onScroll?: (event: WebViewScrollEvent) => void;
   onGesture?: (event: WebViewGestureEvent) => void;
   onLoadingError: (event: WebViewErrorEvent) => void;
   onLoadingFinish: (event: WebViewNavigationEvent) => void;
