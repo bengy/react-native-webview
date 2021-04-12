@@ -254,7 +254,7 @@ public class RNCWebViewManager extends SimpleViewManager<WebView> {
     WritableMap event = Arguments.createMap();
     event.putString("gesture", gesture);
 
-    dispatchEvent(
+    ((RNCWebView) webView).dispatchEvent(
       webView,
       new TopGestureEvent(
         webView.getId(),
